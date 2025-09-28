@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Absensi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden-form {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            position: absolute;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-4">
+
+    <div id="closed-modal" style="margin-top: 5rem;" class="hidden w-full max-w-md">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center border border-slate-200">
+            <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h2 class="mt-4 text-2xl font-bold text-slate-800">Presensi Ditutup</h2>
+            <p class="mt-2 text-slate-600 leading-relaxed">Maaf, presensi saat ini belum dibuka atau sudah ditutup oleh admin.</p>
+            <a href="/" class="mt-6 inline-flex items-center justify-center w-full rounded-lg bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-3 font-semibold text-white hover:from-slate-800 hover:to-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-300 transition-all duration-200 shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Kembali ke Beranda
+            </a>
+        </div>
+    </div>
+
+    <div id="main-container" class="hidden w-full max-w-lg">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl border border-slate-200">
+            <div class="flex justify-center mb-5">
+                                    <img src="https://ucarecdn.com/382b5c5d-8bae-48d2-b42d-f22a93bbff77/468556946_545462784956500_3658096931176580766_n.jpg" width="100px" height="auto" class="rounded-full" alt="">
+
+            </div>
+            
+            <div id="timer-container" class="text-center mb-6 bg-green-50 p-4 rounded-lg">
+                <p class="text-sm font-medium text-indigo-700">Batas Waktu Absensi:</p>
+                <p id="countdown" class="text-3xl font-bold text-indigo-900 tracking-wider">Memuat...</p>
+            </div>
+
+            <div id="on-time-form-container" class="form-container">
+                
+
+                <form id="attendance-form" class="space-y-5">
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <div class="flex items-start">
+                            
+                            <div>
+                                <p class="text-sm font-semibold text-blue-800">Perhatian!</p>
+                                <p class="text-xs text-blue-700 mt-1">Sistem akan meminta akses lokasi untuk memverifikasi kehadiran di area sekolah.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="fullName" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Nama Lengkap
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="fullName" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="studentClass" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                            Kelas
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="studentClass" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="division" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Bidang / Divisi
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="division" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+
+                    <button type="submit" id="submit-attendance" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Kirim Presensi
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+             <div id="late-form-container" class="form-container hidden-form">
+                  <div class="text-center mb-4 bg-red-600 border-l-4 border-red-400 p-4 rounded-r-lg">
+                     <h3 class="font-bold text-white">Anda Terlambat!</h3>
+                     <p class="text-sm text-white">Silahkan sertakan alasan jika ada</p>
+                </div>
+                <form id="late-form" class="space-y-5">
+                     <div>
+                        <label for="lateFullName" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Nama Lengkap
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="lateFullName" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="lateStudentClass" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                            Kelas
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="lateStudentClass" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="lateDivision" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Bidang / Divisi
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="text" id="lateDivision" required class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-slate-50 hover:bg-white transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="reason" class="flex items-center text-sm font-semibold text-slate-700 mb-2">
+                            <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Alasan Keterlambatan
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <textarea id="reason" rows="4" required placeholder="Jelaskan alasan keterlambatan dengan lengkap..." class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-slate-50 hover:bg-white transition-all duration-200 resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-red-600 text-white font-bold py-4 px-4 rounded-lg hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                        <span class="flex items-center justify-center">
+                           
+                            Kirim Presensi
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    // Konfigurasi SweetAlert Toast (masih dipakai untuk notifikasi kecil)
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+    });
+
+    // Elemen DOM
+    const timerContainer = document.getElementById('timer-container');
+    const mainContainer = document.getElementById('main-container');
+    const closedModal = document.getElementById('closed-modal');
+    const onTimeFormContainer = document.getElementById('on-time-form-container');
+    const lateFormContainer = document.getElementById('late-form-container');
+    const countdownEl = document.getElementById('countdown');
+    const attendanceForm = document.getElementById('attendance-form');
+    const lateForm = document.getElementById('late-form');
+
+    let countdownInterval;
+
+    function startCountdown(deadline) {
+        const deadlineTime = new Date(deadline).getTime();
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = deadlineTime - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownEl.innerHTML = "00:00:00";
+               timerContainer.classList.add('hidden')
+                onTimeFormContainer.classList.add('hidden-form');
+                lateFormContainer.classList.remove('hidden-form');
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            countdownEl.innerHTML = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }, 1000);
+    }
+
+    window.addEventListener('load', async () => {
+        try {
+            const response = await fetch('/api/attendance-status');
+            const status = await response.json();
+
+            isPresenceActive = status.is_active; 
+
+            if (isPresenceActive) {
+                mainContainer.classList.remove('hidden');
+                closedModal.classList.add('hidden');
+                startCountdown(status.deadline_time);
+            } else {
+                mainContainer.classList.add('hidden');
+                closedModal.classList.remove('hidden');
+            }
+        } catch (error) {
+            isPresenceActive = false;
+            mainContainer.classList.add('hidden');
+            closedModal.classList.remove('hidden');
+            closedModal.querySelector('p').textContent = 'Gagal memuat status presensi. Coba lagi nanti.';
+        }
+    });
+
+    // Cek status ke server setiap 10 detik.
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/attendance-status');
+            const latestStatus = await response.json();
+
+            if (latestStatus.is_active !== isPresenceActive) {
+                location.reload();
+            }
+        } catch (error) {
+            console.error("Gagal melakukan polling status:", error);
+        }
+    }, 10000); // 10 detik
+  
+    attendanceForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const submitButton = document.getElementById('submit-attendance');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Memproses...';
+        Toast.fire({ icon: 'info', title: 'Meminta akses lokasi Anda...' });
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    studentClass: document.getElementById('studentClass').value,
+                    division: document.getElementById('division').value,
+                    latitude,
+                    longitude
+                };
+                try {
+                    const response = await fetch('/api/attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    const result = await response.json();
+                     if (result.success) {
+                        if (result.status === 'present') {
+                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: result.message, confirmButtonColor: '#4f46e5' });
+                        } else {
+                            Swal.fire({ icon: 'warning', title: 'Di Luar Lokasi!', text: result.message, confirmButtonColor: '#f97316' });
+                        }
+                        attendanceForm.reset();
+                    } else {
+                         Swal.fire({ icon: 'error', title: 'Gagal!', text: result.message, confirmButtonColor: '#ef4444' });
+                    }
+                } catch (error) {
+                     Toast.fire({ icon: 'error', title: 'Terjadi kesalahan jaringan.' });
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Kirim Kehadiran';
+                }
+            },
+            (error) => {
+                Toast.fire({ icon: 'error', title: 'Akses lokasi ditolak. Absensi tidak dapat dilanjutkan.' });
+                submitButton.disabled = false;
+                submitButton.textContent = 'Kirim Kehadiran';
+            },
+            { enableHighAccuracy: true }
+        );
+    });
+
+    lateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = {
+            fullName: document.getElementById('lateFullName').value,
+            studentClass: document.getElementById('lateStudentClass').value,
+            division: document.getElementById('lateDivision').value,
+            reason: document.getElementById('reason').value,
+        };
+        try {
+            const response = await fetch('/api/late-attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+            if (result.success) {
+                Swal.fire({ icon: 'success', title: 'Berhasil!', text: result.message, confirmButtonColor: '#f59e0b' })
+                .then(() => lateForm.reset());
+            } else {
+                Toast.fire({ icon: 'error', title: result.message });
+            }
+        } catch (error) {
+            Toast.fire({ icon: 'error', title: 'Terjadi kesalahan jaringan.' });
+        }
+    });
+</script>
+</body>
+</html>
