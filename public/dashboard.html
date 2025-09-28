@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="https://ucarecdn.com/382b5c5d-8bae-48d2-b42d-f22a93bbff77/468556946_545462784956500_3658096931176580766_n.jpg" type="image/x-icon">
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style> 
@@ -31,7 +32,6 @@
 
     <div class="p-4 sm:p-6 lg:p-8">
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
             <button id="logoutButton" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition">Logout</button>
         </header>
 
@@ -284,7 +284,7 @@
     logoutButton.addEventListener('click', async () => {
         await fetch('/api/logout', { method: 'POST' });
         Toast.fire({ icon: 'success', title: 'Logout berhasil!' });
-        setTimeout(() => window.location.href = '/login.html', 1500);
+        setTimeout(() => window.location.href = '/login', 1500);
     });
 
     presenceToggle.addEventListener('change', () => {
