@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Keterangan Berhalangan Hadir</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Form Izin / Sakit</h1>
+        <form id="izin-form" class="space-y-5">
+            <div>
+                <label for="memberId" class="block text-sm font-medium text-gray-700 mb-1">Pilih Nama Anda</label>
+                <select id="memberId" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    <option value="">Memuat daftar anggota...</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status Kehadiran</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center"><input type="radio" name="status" value="Izin" required class="mr-2 text-yellow-600 focus:ring-yellow-500">Izin</label>
+                    <label class="flex items-center"><input type="radio" name="status" value="Sakit" required class="mr-2 text-yellow-600 focus:ring-yellow-500">Sakit</label>
+                </div>
+            </div>
+            <div>
+                 <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Alasan / Keterangan Singkat</label>
+                 <textarea id="reason" rows="4" required placeholder="Contoh: Ada acara keluarga mendadak." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition">
+                Kirim Keterangan
+            </button>
+        </form>
+    </div>
+<script>
+    const memberSelect = document.getElementById('memberId');
+    const form = document.getElementById('izin-form');
+
+    window.addEventListener('load', async () => {
+        try {
+            const response = await fetch('/api/public/members');
+            const members = await response.json();
+            memberSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            members.forEach(member => {
+                const option = document.createElement('option');
+                // DIUBAH: Menggunakan 'nipd' sesuai data dari API
+                option.value = member.nipd; 
+                option.textContent = member.full_name;
+                memberSelect.appendChild(option);
+            });
+        } catch (error) {
+            memberSelect.innerHTML = '<option value="">Gagal memuat anggota</option>';
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        
+        // DIUBAH: Key 'memberId' diubah menjadi 'nipd' agar sesuai dengan backend
+        const data = {
+            nipd: document.getElementById('memberId').value,
+            status: formData.get('status'),
+            reason: document.getElementById('reason').value
+        };
+
+        // DIUBAH: Pengecekan disesuaikan dengan key 'nipd' yang baru
+        if (!data.nipd || !data.status || !data.reason) {
+            Swal.fire({ icon: 'error', title: 'Data Tidak Lengkap', text: 'Harap isi semua kolom yang tersedia.' });
+            return;
+        }
+        
+        Swal.fire({ title: 'Mengirim data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            const response = await fetch('/api/absen-berhalangan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            Swal.fire({ icon: result.success ? 'success' : 'error', title: result.success ? 'Berhasil!' : 'Gagal!', text: result.message });
+            if (result.success) form.reset();
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.' });
+        }
+    });
+</script>
+</body>
+</html>

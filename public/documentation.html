@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi Reset Database Satgas/OSIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <h1 class="text-3xl font-bold">📋 Dokumentasi Reset Database Satgas/OSIS</h1>
+                <p class="text-blue-100 mt-2">Panduan lengkap untuk mereset database tahun ajaran baru</p>
+            </div>
+        </header>
+
+        <!-- Peringatan -->
+        <div class="container mx-auto px-4 py-6">
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md mb-6">
+                <div class="flex items-start">
+                    <span class="text-3xl mr-3">⚠️</span>
+                    <div>
+                        <h2 class="text-red-800 font-bold text-xl mb-2">PERINGATAN PENTING!</h2>
+                        <p class="text-red-700">Menjalankan skrip ini akan <strong>MENGHAPUS SEMUA data anggota</strong> dan <strong>SEMUA riwayat absensi</strong> sebelumnya secara <strong>PERMANEN</strong>. Pastikan Anda sudah melakukan backup data jika diperlukan!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Langkah-langkah -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">📝</span>
+                    Langkah-Langkah Penggunaan
+                </h2>
+
+                <!-- Step 1 -->
+                <div class="mb-6 pb-6 border-b border-gray-200">
+                    <div class="flex items-start">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">1</span>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Login ke Neon Tech</h3>
+                            <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                <li>Kunjungi <a href="https://neon.tech" target="_blank" class="text-blue-600 hover:underline font-medium">neon.tech</a></li>
+                                <li>Login menggunakan akun Google Anda</li>
+                                <li>Buat database baru dengan nama sesuai tahun, contoh: <code class="bg-gray-100 px-2 py-1 rounded text-sm">satgas-2027</code> atau <code class="bg-gray-100 px-2 py-1 rounded text-sm">osis-2027</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="mb-6 pb-6 border-b border-gray-200">
+                    <div class="flex items-start">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">2</span>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Buka SQL Editor</h3>
+                            <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                <li>Setelah berhasil masuk ke dashboard Neon</li>
+                                <li>Cari dan klik menu <strong>"SQL Editor"</strong></li>
+                                <li>Pastikan Anda sudah memilih database yang benar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="mb-6 pb-6 border-b border-gray-200">
+                    <div class="flex items-start">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">3</span>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Sesuaikan Data Anggota</h3>
+                            <p class="text-gray-700 mb-3">Sebelum menjalankan skrip, ubah data anggota sesuai kebutuhan Anda. Perhatikan struktur data berikut:</p>
+                            <div class="bg-gray-800 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                                <pre>('OSIS-2027-01', 'Nama Lengkap', 'Devisi', 'Jabatan'),
+('OSIS-2027-02', 'Nama Lengkap', 'Devisi', 'Jabatan');</pre>
+                            </div>
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4 rounded">
+                                <p class="text-sm text-blue-800"><strong>💡 Tips:</strong> Untuk data terakhir, tutup dengan tanda titik koma <code class="bg-blue-100 px-1 rounded">;</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="mb-6">
+                    <div class="flex items-start">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">4</span>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3">Jalankan Skrip</h3>
+                            <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                <li>Salin seluruh skrip SQL yang sudah disesuaikan</li>
+                                <li>Tempelkan di SQL Editor</li>
+                                <li>Klik tombol <strong>"Run"</strong> atau <strong>"Execute"</strong></li>
+                                <li>Tunggu hingga proses selesai</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Penjelasan Struktur -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-green-100 text-green-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">🗂️</span>
+                    Struktur Database
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Table 1 -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">📊 satgas_members</h3>
+                        <p class="text-gray-600 text-sm mb-3">Tabel untuk menyimpan data anggota Satgas/OSIS</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Kolom</th>
+                                        <th class="px-4 py-2 text-left">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">nipd</td>
+                                        <td class="px-4 py-2">ID unik anggota (contoh: OSIS-2027-01)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">full_name</td>
+                                        <td class="px-4 py-2">Nama lengkap anggota</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">devisi</td>
+                                        <td class="px-4 py-2">Divisi anggota (Inti, Keamanan, Acara, dll)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">jabatan</td>
+                                        <td class="px-4 py-2">Jabatan anggota (Ketua, Koordinator, Anggota)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">is_active</td>
+                                        <td class="px-4 py-2">Status aktif anggota (otomatis true)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Table 2 -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">📅 attendance_records</h3>
+                        <p class="text-gray-600 text-sm mb-3">Tabel untuk menyimpan riwayat absensi</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Kolom</th>
+                                        <th class="px-4 py-2 text-left">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">member_id</td>
+                                        <td class="px-4 py-2">Referensi ke NIPD anggota</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">attendance_time</td>
+                                        <td class="px-4 py-2">Waktu absensi (otomatis)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-mono text-xs">status</td>
+                                        <td class="px-4 py-2">Status kehadiran (Hadir, Izin, Sakit, dll)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Table 3 -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">⚙️ settings</h3>
+                        <p class="text-gray-600 text-sm">Tabel untuk pengaturan sistem absensi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contoh Penggunaan -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-purple-100 text-purple-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">💻</span>
+                    Contoh Kode Lengkap
+                </h2>
+                
+                <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+                    <pre class="text-sm font-mono"><code>DROP TABLE IF EXISTS attendance_records;
+DROP TABLE IF EXISTS satgas_members;
+DROP TABLE IF EXISTS settings;
+
+CREATE TABLE satgas_members (
+    id SERIAL PRIMARY KEY,
+    nipd VARCHAR(50) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    devisi VARCHAR(50),
+    jabatan VARCHAR(50),
+    is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE attendance_records (
+    id SERIAL PRIMARY KEY,
+    member_id VARCHAR(50) NOT NULL REFERENCES satgas_members(nipd),
+    attendance_time TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    attendance_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    status VARCHAR(50) NOT NULL DEFAULT 'Hadir',
+    reason TEXT,
+    UNIQUE(member_id, attendance_date)
+);
+
+CREATE TABLE settings (
+    id INT PRIMARY KEY,
+    is_active BOOLEAN NOT NULL DEFAULT false,
+    is_keamanan_form_active BOOLEAN NOT NULL DEFAULT false,
+    is_izin_form_active BOOLEAN NOT NULL DEFAULT false
+);
+
+INSERT INTO settings (id, is_active, is_keamanan_form_active, is_izin_form_active) 
+VALUES (1, false, false, false);
+
+INSERT INTO satgas_members (nipd, full_name, devisi, jabatan) VALUES
+('OSIS-2027-01', 'Ahmad Zulkarnain', 'Inti', 'Ketua'),
+('OSIS-2027-02', 'Bunga Citra Melati', 'Inti', 'Wakil Ketua'),
+('OSIS-2027-03', 'Cahyo Wibisono', 'Inti', 'Sekretaris'),
+('OSIS-2027-04', 'Diana Safitri', 'Inti', 'Bendahara'),
+('OSIS-2027-05', 'Eko Prasetyo', 'Keamanan', 'Koordinator'),
+('OSIS-2027-06', 'Fitriani Rahayu', 'Keamanan', 'Anggota'),
+('OSIS-2027-07', 'Gilang Ramadhan', 'Acara', 'Koordinator'),
+('OSIS-2027-08', 'Hilda Nuraini', 'Acara', 'Anggota'),
+('OSIS-2027-09', 'Indra Setiawan', 'Dokumentasi', 'Koordinator'),
+('OSIS-2027-10', 'Jasmine Larasati', 'Dokumentasi', 'Anggota'),
+('OSIS-2027-11', 'Kevin Mahendra', 'Humas', 'Koordinator'),
+('OSIS-2027-12', 'Lia Agustina', 'Konsumsi', 'Anggota');</code></pre>
+                </div>
+
+                <button onclick="copyCode()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                    📋 Salin Kode
+                </button>
+                <span id="copyMessage" class="ml-3 text-green-600 font-semibold hidden">✓ Berhasil disalin!</span>
+            </div>
+
+            <!-- Tips -->
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 p-6 rounded-lg shadow-md">
+                <h3 class="font-bold text-lg text-yellow-800 mb-3">💡 Tips & Catatan Penting</h3>
+                <ul class="space-y-2 text-yellow-900">
+                    <li class="flex items-start">
+                        <span class="mr-2">•</span>
+                        <span>Pastikan format NIPD konsisten: <code class="bg-yellow-100 px-2 py-1 rounded text-sm">OSIS-TAHUN-NOMOR</code></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2">•</span>
+                        <span>Backup data lama sebelum menjalankan skrip reset</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2">•</span>
+                        <span>Ubah tahun pada NIPD sesuai tahun ajaran baru (contoh: 2027, 2028)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2">•</span>
+                        <span>Divisi yang umum: Inti, Keamanan, Acara, Dokumentasi, Humas, Konsumsi</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2">•</span>
+                        <span>Jabatan yang umum: Ketua, Wakil Ketua, Sekretaris, Bendahara, Koordinator, Anggota</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">Dokumentasi Database Satgas/OSIS</p>
+                <p class="text-sm text-gray-500 mt-2">Gunakan dengan hati-hati dan pastikan data sudah di-backup</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function copyCode() {
+            const code = `DROP TABLE IF EXISTS attendance_records;
+DROP TABLE IF EXISTS satgas_members;
+DROP TABLE IF EXISTS settings;
+
+CREATE TABLE satgas_members (
+    id SERIAL PRIMARY KEY,
+    nipd VARCHAR(50) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    devisi VARCHAR(50),
+    jabatan VARCHAR(50),
+    is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE attendance_records (
+    id SERIAL PRIMARY KEY,
+    member_id VARCHAR(50) NOT NULL REFERENCES satgas_members(nipd),
+    attendance_time TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    attendance_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    status VARCHAR(50) NOT NULL DEFAULT 'Hadir',
+    reason TEXT,
+    UNIQUE(member_id, attendance_date)
+);
+
+CREATE TABLE settings (
+    id INT PRIMARY KEY,
+    is_active BOOLEAN NOT NULL DEFAULT false,
+    is_keamanan_form_active BOOLEAN NOT NULL DEFAULT false,
+    is_izin_form_active BOOLEAN NOT NULL DEFAULT false
+);
+
+INSERT INTO settings (id, is_active, is_keamanan_form_active, is_izin_form_active) 
+VALUES (1, false, false, false);
+
+INSERT INTO satgas_members (nipd, full_name, devisi, jabatan) VALUES
+('OSIS-2027-01', 'Ahmad Zulkarnain', 'Inti', 'Ketua'),
+('OSIS-2027-02', 'Bunga Citra Melati', 'Inti', 'Wakil Ketua'),
+('OSIS-2027-03', 'Cahyo Wibisono', 'Inti', 'Sekretaris'),
+('OSIS-2027-04', 'Diana Safitri', 'Inti', 'Bendahara'),
+('OSIS-2027-05', 'Eko Prasetyo', 'Keamanan', 'Koordinator'),
+('OSIS-2027-06', 'Fitriani Rahayu', 'Keamanan', 'Anggota'),
+('OSIS-2027-07', 'Gilang Ramadhan', 'Acara', 'Koordinator'),
+('OSIS-2027-08', 'Hilda Nuraini', 'Acara', 'Anggota'),
+('OSIS-2027-09', 'Indra Setiawan', 'Dokumentasi', 'Koordinator'),
+('OSIS-2027-10', 'Jasmine Larasati', 'Dokumentasi', 'Anggota'),
+('OSIS-2027-11', 'Kevin Mahendra', 'Humas', 'Koordinator'),
+('OSIS-2027-12', 'Lia Agustina', 'Konsumsi', 'Anggota');`;
+
+            navigator.clipboard.writeText(code).then(() => {
+                const message = document.getElementById('copyMessage');
+                message.classList.remove('hidden');
+                setTimeout(() => {
+                    message.classList.add('hidden');
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

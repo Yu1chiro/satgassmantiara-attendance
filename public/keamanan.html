@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Tugas Pagi Keamanan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Absensi Tugas Pagi</h1>
+        <p class="text-center text-gray-600 mb-6">Khusus untuk Satgas Keamanan</p>
+        <form id="keamanan-form" class="space-y-6">
+            <div>
+                <label for="memberId" class="block text-sm font-medium text-gray-700 mb-1">Pilih Nama Anda</label>
+                <select id="memberId" name="memberId" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Memuat daftar anggota...</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition transform hover:scale-105">
+                Kirim Absensi
+            </button>
+        </form>
+    </div>
+<script>
+    const memberSelect = document.getElementById('memberId');
+    const form = document.getElementById('keamanan-form');
+
+    window.addEventListener('load', async () => {
+        try {
+            const response = await fetch('/api/public/members');
+            const members = await response.json();
+            memberSelect.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.nipd; // DIUBAH: dari member.member_id menjadi member.nipd
+                option.textContent = member.full_name;
+                memberSelect.appendChild(option);
+            });
+        } catch (error) {
+            memberSelect.innerHTML = '<option value="">Gagal memuat anggota</option>';
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const memberId = memberSelect.value;
+        if (!memberId) {
+            Swal.fire({ icon: 'error', title: 'Oops...', text: 'Anda harus memilih nama terlebih dahulu!' });
+            return;
+        }
+        
+        Swal.fire({ title: 'Mengirim data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            const response = await fetch('/api/absen-keamanan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // DIUBAH: mengirim { nipd: ... } sesuai permintaan backend
+                body: JSON.stringify({ nipd: memberId }) 
+            });
+            const result = await response.json();
+            Swal.fire({ icon: result.success ? 'success' : 'error', title: result.success ? 'Berhasil!' : 'Gagal!', text: result.message });
+            if (result.success) form.reset();
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.' });
+        }
+    });
+</script>
+</body>
+</html>

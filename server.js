@@ -1,15 +1,13 @@
-// Import library yang dibutuhkan
 require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const { Pool } = require("pg");
+const qrcode = require("qrcode");
 
-// Inisialisasi aplikasi Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Konfigurasi koneksi database dari .env
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -17,22 +15,11 @@ const pool = new Pool({
   },
 });
 
-// Middleware
-app.use(express.json()); // parsing body JSON
-app.use(express.urlencoded({ extended: true })); //  parsing form data
-app.use(cookieParser()); // parsing cookies
-app.use(express.static(path.join(__dirname, "public"))); 
-// (Haversine Formula)
-function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // Radius bumi dalam meter
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Jarak dalam meter
-}
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware auth
 const authMiddleware = (req, res, next) => {
   if (req.cookies.authToken === "valid_token") {
     next();
@@ -41,211 +28,249 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// --- RUTE HALAMAN ---
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-app.get("/attendance", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "attendance.html"));
-});
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
+app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
+app.get("/dashboard", authMiddleware, (req, res) => res.sendFile(path.join(__dirname, "public", "dashboard.html")));
+app.get("/generate", authMiddleware, (req, res) => res.sendFile(path.join(__dirname, "public", "generate.html")));
+app.get("/documentation", authMiddleware, (req, res) => res.sendFile(path.join(__dirname, "public", "documentation.html")));
+
+app.get('/presensi-kamtibsis', async (req, res) => {
+    try {
+        const settings = await pool.query('SELECT is_keamanan_form_active FROM settings WHERE id = 1');
+        if (settings.rows[0] && settings.rows[0].is_keamanan_form_active) {
+            res.sendFile(path.join(__dirname, 'public', 'keamanan.html'));
+        } else {
+            res.sendFile(path.join(__dirname, 'public', 'form-closed.html'));
+        }
+    } catch (error) {
+        res.status(500).send("Server error");
+    }
 });
 
-app.get("/dashboard", authMiddleware, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+app.get('/presensi-izin-sakit', async (req, res) => {
+    try {
+        const settings = await pool.query('SELECT is_izin_form_active FROM settings WHERE id = 1');
+        if (settings.rows[0] && settings.rows[0].is_izin_form_active) {
+            res.sendFile(path.join(__dirname, 'public', 'berhalangan.html'));
+        } else {
+            res.sendFile(path.join(__dirname, 'public', 'form-closed.html'));
+        }
+    } catch (error) {
+        res.status(500).send("Server error");
+    }
 });
 
-// --- RUTE API ---
-
-// API untuk Login Admin
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
-    res.cookie("authToken", "valid_token", { httpOnly: true, secure: process.env.NODE_ENV === "production", maxAge: 3600000 }); // Cookie 1 jam
+    res.cookie("authToken", "valid_token", { httpOnly: true, secure: process.env.NODE_ENV === "production", maxAge: 3600000 });
     res.json({ success: true, message: "Login berhasil!" });
   } else {
     res.status(401).json({ success: false, message: "Username atau password salah." });
   }
 });
 
-// API untuk Logout Admin
 app.post("/api/logout", (req, res) => {
   res.clearCookie("authToken");
   res.json({ success: true, message: "Logout berhasil." });
 });
 
-// API untuk mendapatkan pengaturan (lokasi & timer)
 app.get('/api/settings', authMiddleware, async (req, res) => {
     try {
-        // Ambil juga kolom is_active
-        const result = await pool.query('SELECT target_latitude, target_longitude, deadline_time, is_active FROM settings WHERE id = 1');
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).json({ error: 'Pengaturan tidak ditemukan.' });
-        }
+        const result = await pool.query('SELECT is_active, is_keamanan_form_active, is_izin_form_active FROM settings WHERE id = 1');
+        res.json(result.rows[0] || {});
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });
+app.get('/api/search', async (req, res) => {
+    const { name } = req.query;
 
-// Ganti rute POST /api/settings yang lama
-app.post('/api/settings', authMiddleware, async (req, res) => {
-    // Ambil juga nilai is_active dari body
-    const { latitude, longitude, deadline, is_active } = req.body;
+    if (!name || name.length < 3) {
+        return res.status(400).json({ error: 'Nama harus terdiri dari minimal 3 karakter.' });
+    }
+
     try {
         const query = `
-            UPDATE settings
-            SET target_latitude = $1, target_longitude = $2, deadline_time = $3, is_active = $4
+            SELECT 
+                m.full_name,
+                m.devisi,
+                m.jabatan,
+                r.status,
+                r.attendance_date -- Diubah: Ambil tanggal mentah tanpa format
+            FROM attendance_records r
+            JOIN satgas_members m ON r.member_id = m.nipd
+            WHERE m.full_name ILIKE $1
+            ORDER BY r.attendance_date DESC;
+        `;
+        const searchTerm = `%${name}%`;
+        const { rows } = await pool.query(query, [searchTerm]);
+        res.json(rows);
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ error: 'Terjadi kesalahan pada server.' });
+    }
+});
+app.post('/api/settings', authMiddleware, async (req, res) => {
+    const { is_active, is_keamanan_form_active, is_izin_form_active } = req.body;
+    try {
+        const query = `
+            UPDATE settings 
+            SET 
+                is_active = COALESCE($1, is_active),
+                is_keamanan_form_active = COALESCE($2, is_keamanan_form_active),
+                is_izin_form_active = COALESCE($3, is_izin_form_active)
             WHERE id = 1
         `;
-        await pool.query(query, [latitude, longitude, deadline, is_active]);
-        res.json({ success: true, message: 'Pengaturan berhasil disimpan!' });
+        await pool.query(query, [is_active, is_keamanan_form_active, is_izin_form_active]);
+        res.json({ success: true, message: 'Pengaturan berhasil diperbarui!' });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ success: false, message: 'Gagal menyimpan pengaturan.' });
     }
 });
-app.get('/api/attendance-status', async (req, res) => {
+
+app.get('/api/public/members', async (req, res) => {
     try {
-        const result = await pool.query('SELECT is_active, deadline_time FROM settings WHERE id = 1');
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            // Jika tidak ada pengaturan, anggap tidak aktif
-            res.json({ is_active: false });
-        }
+        const { rows } = await pool.query('SELECT nipd, full_name FROM satgas_members ORDER BY full_name ASC');
+        res.json(rows);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ is_active: false, error: 'Server error' });
+        res.status(500).json({ error: "Gagal mengambil data anggota" });
     }
 });
-// API untuk Absensi Tepat Waktu (dengan Geolocation)
-app.post("/api/attendance", async (req, res) => {
-  const { fullName, studentClass, division, latitude, longitude } = req.body;
 
-  if (!fullName || !studentClass || !division || !latitude || !longitude) {
-    return res.status(400).json({ success: false, message: "Semua field harus diisi." });
-  }
-    const statusResult = await pool.query('SELECT is_active FROM settings WHERE id = 1');
-        if (!statusResult.rows[0].is_active) {
-            return res.status(403).json({ success: false, message: 'Presensi saat ini sedang ditutup oleh admin.' });
+app.get('/api/generate-qr', authMiddleware, async (req, res) => {
+    const { nipd } = req.query;
+    try {
+        const dataUrl = await qrcode.toDataURL(nipd, { width: 250 });
+        res.json({ qr_code_url: dataUrl });
+    } catch (err) {
+        res.status(500).json({ error: 'Gagal membuat QR code' });
+    }
+});
+
+app.post('/api/scan', authMiddleware, async (req, res) => {
+    const { nipd } = req.body;
+    try {
+        const settings = await pool.query('SELECT is_active FROM settings WHERE id = 1');
+        if (!settings.rows[0] || !settings.rows[0].is_active) {
+            return res.status(403).json({ success: false, message: 'Sesi absensi pindai QR sedang ditutup.' });
         }
-  try {
-    const settings = await pool.query("SELECT target_latitude, target_longitude, deadline_time FROM settings WHERE id = 1");
-
-    if (settings.rows.length === 0 || !settings.rows[0].target_latitude || !settings.rows[0].target_longitude) {
-      return res.status(400).json({ success: false, message: "Lokasi absensi belum diatur oleh admin." });
+        const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+        if (memberResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: `QR Code tidak valid. NIPD "${nipd}" tidak terdaftar.` });
+        }
+        const memberName = memberResult.rows[0].full_name;
+        await pool.query("INSERT INTO attendance_records (member_id, status) VALUES ($1, 'Hadir')", [nipd]);
+        res.json({ success: true, message: `${memberName} berhasil dicatat HADIR!` });
+    } catch (err) {
+        if (err.code === '23505') {
+            const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+            const memberName = memberResult.rows.length ? memberResult.rows[0].full_name : 'Anggota ini';
+            return res.status(409).json({ success: false, message: `${memberName} sudah tercatat dalam sistem absensi hari ini.` });
+        }
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
     }
-
-    const { target_latitude, target_longitude, deadline_time } = settings.rows[0];
-
-    if (new Date() > new Date(deadline_time)) {
-      return res.status(400).json({ success: false, message: "Waktu absensi sudah habis." });
-    }
-
-    const distance = getDistanceFromLatLonInMeters(latitude, longitude, parseFloat(target_latitude), parseFloat(target_longitude));
-
-    let attendanceStatus = distance <= 500 ? "Hadir" : "Tidak Hadir";
-    let responseStatus = distance <= 500 ? "present" : "absent";
-    let responseMessage = distance <= 500 ? `Absensi berhasil! Anda berada ${Math.round(distance)} meter dari lokasi.` : `Anda berada terlalu jauh (${Math.round(distance)} meter). Kehadiran Anda di sistem otomatis TIDAK HADIR.`;
-
-    // --- PERUBAHAN UTAMA: Simpan juga koordinat pengguna ---
-    await pool.query(
-      `INSERT INTO attendance_records 
-            (full_name, student_class, division, status, user_latitude, user_longitude) 
-            VALUES ($1, $2, $3, $4, $5, $6)`,
-      [fullName, studentClass, division, attendanceStatus, latitude, longitude]
-    );
-
-    res.json({ success: true, status: responseStatus, message: responseMessage });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Terjadi kesalahan pada server." });
-  }
-});
-// API untuk Absensi Terlambat
-app.post("/api/late-attendance", async (req, res) => {
-  const { fullName, studentClass, division, reason } = req.body;
-
-  if (!fullName || !studentClass || !division || !reason) {
-    return res.status(400).json({ success: false, message: "Semua field harus diisi, termasuk alasan keterlambatan." });
-  }
-
-  try {
-    await pool.query("INSERT INTO attendance_records (full_name, student_class, division, status, reason) VALUES ($1, $2, $3, $4, $5)", [fullName, studentClass, division, "Terlambat", reason]);
-    res.json({ success: true, message: "Catatan keterlambatan Anda berhasil dikirim." });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Terjadi kesalahan pada server." });
-  }
 });
 
-// API untuk mendapatkan data absensi (dengan filter)
+app.post('/api/absen-keamanan', async (req, res) => {
+    const { nipd } = req.body;
+    try {
+        const settings = await pool.query('SELECT is_keamanan_form_active FROM settings WHERE id = 1');
+        if (!settings.rows[0] || !settings.rows[0].is_keamanan_form_active) {
+            return res.status(403).json({ success: false, message: 'Form absensi ini sedang tidak aktif.' });
+        }
+        const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+        if (memberResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: `NIPD Anggota tidak valid.` });
+        }
+        const memberName = memberResult.rows[0].full_name;
+        await pool.query("INSERT INTO attendance_records (member_id, status) VALUES ($1, 'Tugas Pagi')", [nipd]);
+        res.json({ success: true, message: `Terima kasih, ${memberName}. Kehadiran Tugas Pagi Anda telah dicatat.` });
+    } catch (err) {
+        if (err.code === '23505') {
+            const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+            const memberName = memberResult.rows.length ? memberResult.rows[0].full_name : 'Anda';
+            return res.status(409).json({ success: false, message: `${memberName} sudah tercatat dalam sistem absensi hari ini.` });
+        }
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+    }
+});
+
+app.post('/api/absen-berhalangan', async (req, res) => {
+    const { nipd, status, reason } = req.body;
+    try {
+        const settings = await pool.query('SELECT is_izin_form_active FROM settings WHERE id = 1');
+        if (!settings.rows[0] || !settings.rows[0].is_izin_form_active) {
+            return res.status(403).json({ success: false, message: 'Form absensi ini sedang tidak aktif.' });
+        }
+        const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+        if (memberResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: `NIPD Anggota tidak valid.` });
+        }
+        const memberName = memberResult.rows[0].full_name;
+        await pool.query("INSERT INTO attendance_records (member_id, status, reason) VALUES ($1, $2, $3)", [nipd, status, reason]);
+        res.json({ success: true, message: `Terima kasih, ${memberName}. Keterangan ${status} Anda telah kami terima.` });
+    } catch (err) {
+        if (err.code === '23505') {
+            const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
+            const memberName = memberResult.rows.length ? memberResult.rows[0].full_name : 'Anda';
+            return res.status(409).json({ success: false, message: `${memberName} sudah tercatat dalam sistem absensi hari ini.` });
+        }
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
+    }
+});
+// Rute baru untuk mereset (menghapus) semua data kehadiran pada tanggal tertentu
+app.delete('/api/records', authMiddleware, async (req, res) => {
+    const { date } = req.query;
+    if (!date) {
+        return res.status(400).json({ success: false, message: 'Tanggal diperlukan untuk mereset data.' });
+    }
+
+    try {
+        const result = await pool.query('DELETE FROM attendance_records WHERE attendance_date = $1', [date]);
+        // result.rowCount akan berisi jumlah baris data yang dihapus
+        res.json({ success: true, message: `Berhasil mereset ${result.rowCount} data kehadiran untuk tanggal ${date}.` });
+    } catch (err) {
+        console.error("Error resetting records:", err);
+        res.status(500).json({ success: false, message: 'Gagal mereset data kehadiran di database.' });
+    }
+});
+// Endpoint baru yang aman untuk admin, mengambil data anggota lengkap
+app.get('/api/admin/members', authMiddleware, async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT nipd, full_name, devisi, jabatan FROM satgas_members ORDER BY full_name ASC');
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: "Gagal mengambil data anggota" });
+    }
+});
 app.get("/api/records", authMiddleware, async (req, res) => {
-  const { date } = req.query;
-  if (!date) {
-    return res.status(400).json({ error: "Tanggal diperlukan." });
-  }
-  try {
-    // --- PERUBAHAN UTAMA: Ambil ID dan koordinat pengguna ---
-    const query = `
-            SELECT id, full_name, student_class, division, status, reason, 
-                   user_latitude, user_longitude,
-                   to_char(created_at AT TIME ZONE 'Asia/Makassar', 'HH24:MI:SS') as time
-            FROM attendance_records
-            WHERE DATE(created_at AT TIME ZONE 'Asia/Makassar') = $1
-            ORDER BY created_at DESC
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ error: "Tanggal diperlukan." });
+    try {
+        const query = `
+            SELECT 
+                m.full_name, 
+                m.devisi,
+                m.jabatan,
+                r.reason,
+                COALESCE(r.status, 'Belum Hadir') as status,
+                to_char(r.attendance_time AT TIME ZONE 'Asia/Makassar', 'HH24:MI:SS') as time
+            FROM 
+                satgas_members m
+            LEFT JOIN 
+                attendance_records r ON m.nipd = r.member_id AND r.attendance_date = $1
+            ORDER BY 
+                m.full_name;
         `;
-    const { rows } = await pool.query(query, [date]);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-app.delete("/api/records/:id", authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const deleteQuery = "DELETE FROM attendance_records WHERE id = $1";
-    const result = await pool.query(deleteQuery, [id]);
-
-    if (result.rowCount > 0) {
-      res.json({ success: true, message: "Data berhasil dihapus." });
-    } else {
-      res.status(404).json({ success: false, message: "Data tidak ditemukan." });
+        const { rows } = await pool.query(query, [date]);
+        res.json(rows);
+    } catch (err) {
+        console.error("Error fetching records:", err);
+        res.status(500).json({ error: "Server error" });
     }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Gagal menghapus data." });
-  }
-});
-// API untuk pencarian siswa
-app.get("/api/search", async (req, res) => {
-  const { name } = req.query;
-  if (!name) {
-    return res.status(400).json([]);
-  }
-  try {
-    const query = `
-            SELECT full_name, student_class, division, status,
-                   to_char(created_at AT TIME ZONE 'Asia/Makassar', 'YYYY-MM-DD HH24:MI') as formatted_date
-            FROM attendance_records
-            WHERE full_name ILIKE $1
-            ORDER BY created_at DESC
-            LIMIT 10
-        `;
-    const { rows } = await pool.query(query, [`%${name}%`]);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
 });
 
-// Menjalankan server
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });
