@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin Absensi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="https://ucarecdn.com/382b5c5d-8bae-48d2-b42d-f22a93bbff77/468556946_545462784956500_3658096931176580766_n.jpg" type="image/x-icon">
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="shortcut icon" href="https://ucarecdn.com/ac8a536b-ee74-49e2-92af-5d256d7856ef/Satgas2025.png" type="image/x-icon">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -303,19 +303,32 @@
     const onScanSuccess = async (decodedText) => {
         if (isScannerRunning) html5QrCode.pause();
         Swal.fire({ title: 'Memproses Kehadiran...', text: `NIPD: ${decodedText}`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-        try {
-            const response = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nipd: decodedText }) });
-            const result = await response.json();
-            await Swal.fire({ icon: result.success ? 'success' : 'error', title: result.success ? 'Berhasil!' : 'Gagal!', text: result.message, timer: result.success ? 2000 : 3000, showConfirmButton: !result.success });
-            if (result.success) {
-                if (window.navigator.vibrate) window.navigator.vibrate(100);
-                loadAttendanceData(dateFilter.value);
-            }
-        } catch (err) {
-            await Swal.fire({ icon: 'error', title: 'Koneksi Error', text: 'Gagal menghubungi server.' });
-        } finally {
-            if (isScannerRunning) html5QrCode.resume();
+       // ... di dalam onScanSuccess
+try {
+    const response = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nipd: decodedText }) });
+    const result = await response.json();
+    
+    // Tampilkan notifikasi terlebih dahulu, apa pun hasilnya
+    await Swal.fire({ 
+        icon: response.ok ? 'success' : 'error', 
+        title: response.ok ? 'Berhasil!' : 'Gagal!', 
+        text: result.message, 
+        timer: response.ok ? 2000 : 3000, 
+        showConfirmButton: !response.ok 
+    });
+    
+    // Perbarui tabel jika scan berhasil (200 OK) ATAU jika anggota sudah ada (409 Conflict)
+    if (response.ok || response.status === 409) {
+        if (response.ok && window.navigator.vibrate) {
+            window.navigator.vibrate(100); // Getarkan hanya jika benar-benar sukses
         }
+        loadAttendanceData(dateFilter.value);
+    }
+} catch (err) {
+    await Swal.fire({ icon: 'error', title: 'Koneksi Error', text: 'Gagal menghubungi server.' });
+} finally {
+    if (isScannerRunning) html5QrCode.resume();
+}
     };
 
     const startScanner = () => {
