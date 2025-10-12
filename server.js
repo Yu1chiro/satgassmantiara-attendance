@@ -83,6 +83,8 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.get('/api/search', async (req, res) => {
     const { name } = req.query;
 
@@ -97,9 +99,9 @@ app.get('/api/search', async (req, res) => {
                 m.devisi,
                 m.jabatan,
                 r.status,
-                r.attendance_date -- Diubah: Ambil tanggal mentah tanpa format
+                r.attendance_date
             FROM attendance_records r
-            JOIN satgas_members m ON r.member_id = m.nipd
+            JOIN satgas_members m ON r.satgas_member = m.id
             WHERE m.full_name ILIKE $1
             ORDER BY r.attendance_date DESC;
         `;
@@ -148,6 +150,8 @@ app.get('/api/generate-qr', authMiddleware, async (req, res) => {
     }
 });
 
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.post('/api/scan', authMiddleware, async (req, res) => {
     const { nipd } = req.body;
     try {
@@ -155,23 +159,34 @@ app.post('/api/scan', authMiddleware, async (req, res) => {
         if (!settings.rows[0] || !settings.rows[0].is_active) {
             return res.status(403).json({ success: false, message: 'Sesi absensi pindai QR sedang ditutup.' });
         }
+        
         const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
         if (memberResult.rows.length === 0) {
             return res.status(404).json({ success: false, message: `QR Code tidak valid. NIPD "${nipd}" tidak terdaftar.` });
         }
         const memberName = memberResult.rows[0].full_name;
-        await pool.query("INSERT INTO attendance_records (member_id, status) VALUES ($1, 'Hadir')", [nipd]);
-        res.json({ success: true, message: `${memberName} berhasil dicatat HADIR!` });
+
+        // --- PERBAIKAN FINAL PADA QUERY INSERT ---
+        const insertQuery = `
+            INSERT INTO attendance_records (member_id, status, attendance_date) 
+            VALUES ($1, 'Hadir', (NOW() AT TIME ZONE 'Asia/Makassar')::date)
+            RETURNING to_char(attendance_time AT TIME ZONE 'Asia/Makassar', 'HH24:MI:SS') as time;
+        `;
+        const newRecord = await pool.query(insertQuery, [nipd]);
+        const newTime = newRecord.rows[0].time;
+
+        res.json({ success: true, message: `${memberName} berhasil dicatat HADIR!`, time: newTime, nipd: nipd });
+
     } catch (err) {
         if (err.code === '23505') {
             const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
             const memberName = memberResult.rows.length ? memberResult.rows[0].full_name : 'Anggota ini';
             return res.status(409).json({ success: false, message: `${memberName} sudah tercatat dalam sistem absensi hari ini.` });
         }
+        console.error("Scan error:", err);
         res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
     }
 });
-
 app.post('/api/absen-keamanan', async (req, res) => {
     const { nipd } = req.body;
     try {
@@ -196,6 +211,7 @@ app.post('/api/absen-keamanan', async (req, res) => {
     }
 });
 
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.post('/api/absen-berhalangan', async (req, res) => {
     const { nipd, status, reason } = req.body;
     try {
@@ -203,19 +219,29 @@ app.post('/api/absen-berhalangan', async (req, res) => {
         if (!settings.rows[0] || !settings.rows[0].is_izin_form_active) {
             return res.status(403).json({ success: false, message: 'Form absensi ini sedang tidak aktif.' });
         }
+        
         const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
         if (memberResult.rows.length === 0) {
             return res.status(404).json({ success: false, message: `NIPD Anggota tidak valid.` });
         }
         const memberName = memberResult.rows[0].full_name;
-        await pool.query("INSERT INTO attendance_records (member_id, status, reason) VALUES ($1, $2, $3)", [nipd, status, reason]);
+
+        // --- PERBAIKAN: Menambahkan attendance_date dengan zona waktu WITA ---
+        const insertQuery = `
+            INSERT INTO attendance_records (member_id, status, reason, attendance_date) 
+            VALUES ($1, $2, $3, (NOW() AT TIME ZONE 'Asia/Makassar')::date);
+        `;
+        await pool.query(insertQuery, [nipd, status, reason]);
+
         res.json({ success: true, message: `Terima kasih, ${memberName}. Keterangan ${status} Anda telah kami terima.` });
+    
     } catch (err) {
         if (err.code === '23505') {
             const memberResult = await pool.query('SELECT full_name FROM satgas_members WHERE nipd = $1', [nipd]);
             const memberName = memberResult.rows.length ? memberResult.rows[0].full_name : 'Anda';
             return res.status(409).json({ success: false, message: `${memberName} sudah tercatat dalam sistem absensi hari ini.` });
         }
+        console.error("Absen berhalangan error:", err);
         res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
     }
 });
@@ -244,12 +270,14 @@ app.get('/api/admin/members', authMiddleware, async (req, res) => {
         res.status(500).json({ error: "Gagal mengambil data anggota" });
     }
 });
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.get("/api/records", authMiddleware, async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ error: "Tanggal diperlukan." });
     try {
         const query = `
             SELECT 
+                m.nipd,
                 m.full_name, 
                 m.devisi,
                 m.jabatan,
