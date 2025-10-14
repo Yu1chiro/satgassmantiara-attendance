@@ -84,6 +84,7 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
     }
 });
 // GANTI SELURUH BLOK INI DI FILE SERVER ANDA
+// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.get('/api/search', async (req, res) => {
     const { name } = req.query;
 
@@ -100,7 +101,7 @@ app.get('/api/search', async (req, res) => {
                 r.status,
                 r.attendance_date
             FROM attendance_records r
-            JOIN satgas_members m ON r.satgas_member = m.id
+            JOIN satgas_members m ON r.member_id = m.nipd  -- <<< INI BAGIAN YANG DIPERBAIKI
             WHERE m.full_name ILIKE $1
             ORDER BY r.attendance_date DESC;
         `;
