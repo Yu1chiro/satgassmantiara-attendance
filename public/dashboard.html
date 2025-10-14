@@ -116,63 +116,9 @@
                 <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Hello Admin!</h1>
                 <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Dashboard Kehadiran Siswa</p>
             </div>
-
-            <nav class="hidden sm:flex items-center gap-2">
-                <a href="/generate"
-                    class="bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-blue-700 transition text-sm">Generate
-                    QR</a>
-                <a href="/documentation"
-                    class="bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-blue-700 transition text-sm">Dokumentasi</a>
-                <button id="logoutButton"
-                    class="bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-red-700 transition text-sm">Logout</button>
-            </nav>
-
-            <div class="sm:hidden">
-                <button id="menu-btn"
-                    class="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
-                </button>
-            </div>
         </header>
 
-        <div id="mobile-menu"
-            class="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50">
-            <div class="flex justify-between items-center p-5 border-b">
-                <h2 class="font-bold text-gray-800 text-lg">Menu</h2>
-                <button id="close-btn" class="p-2 hover:bg-gray-100 rounded-lg transition">
-                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <nav class="flex flex-col p-5 space-y-3">
-                <a href="/generate"
-                    class="text-gray-700 hover:bg-blue-50 py-3 px-4 rounded-lg transition font-medium">Generate QR</a>
-                <a href="/documentation"
-                    class="text-gray-700 hover:bg-blue-50 py-3 px-4 rounded-lg transition font-medium">Dokumentasi</a>
-                <button id="logoutButtonMobile"
-                    class="bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 transition mt-3">Logout</button>
-            </nav>
-        </div>
 
-        <script>
-            const menuBtn = document.getElementById('menu-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const closeBtn = document.getElementById('close-btn');
-            const logoutButtonMobile = document.getElementById('logoutButtonMobile');
-
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.remove('translate-x-full');
-            });
-
-            closeBtn.addEventListener('click', () => {
-                mobileMenu.classList.add('translate-x-full');
-            });
-        </script>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <div class="lg:col-span-1 bg-white p-5 sm:p-6 rounded-xl shadow-lg h-fit space-y-5 sm:space-y-6">
@@ -263,11 +209,11 @@
                         </div>
                     </div>
                     <div class="text-xs sm:text-sm text-gray-600 space-y-2 pt-3 border-t">
-                        <p class="hidden"><button
+                        <p>Copy link : <button
                                 class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium"
-                                data-link="/presensi-kamtibsis">📋 Presensi kamtibsis</button></p>
+                                data-link="/presensi-tugas-pagi">Presensi Tugas Pagi</button></p>
                         <p class="flex items-start gap-2">
-                            <span class="text-gray-500">Bagikan:</span>
+                            <span class="text-gray-500">Copy link:</span>
                             <button
                                 class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium break-all text-left"
                                 data-link="/presensi-izin-sakit">Presensi izin & sakit</button>
@@ -286,8 +232,21 @@
                             </svg>
                         </div>
                         <h2 class="text-lg sm:text-xl font-bold text-gray-800">Data Kehadiran</h2>
+                        
                     </div>
+                    <div>
+                         <a href="/documentation"
+                    class="bg-blue-600 text-white cursor-pointer font-normal py-2.5 px-4 rounded-lg hover:bg-blue-700 transition text-sm">
+                    Tutorial</a>
+                        <a href="/generate"
+                    class="bg-green-600 text-white font-normal py-2.5 px-4 rounded-lg hover:bg-green-700 transition text-sm">Generate
+                    QR</a>
+                    
+               
+                                    <button id="logoutButton"
+                    class="bg-red-600 text-white font-normal py-2.5 px-4 rounded-lg hover:bg-red-700 transition text-sm">Logout</button>
 
+                    </div>
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
                         <input type="search" id="searchInput" placeholder="🔍 Cari nama..."
                             class="flex-1 p-2.5 sm:p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base">
@@ -662,7 +621,6 @@
         downloadBtn.addEventListener('click', downloadXLSX);
         resetBtn.addEventListener('click', resetAttendanceData);
         document.getElementById('logoutButton').addEventListener('click', () => { fetch('/api/logout', { method: 'POST' }).then(() => window.location.href = '/login'); });
-        logoutButtonMobile.addEventListener('click', () => { fetch('/api/logout', { method: 'POST' }).then(() => window.location.href = '/login'); });
 
         searchInput.addEventListener('input', () => {
             currentPage = 1;

@@ -34,7 +34,7 @@ app.get("/dashboard", authMiddleware, (req, res) => res.sendFile(path.join(__dir
 app.get("/generate", authMiddleware, (req, res) => res.sendFile(path.join(__dirname, "public", "generate.html")));
 app.get("/documentation", authMiddleware, (req, res) => res.sendFile(path.join(__dirname, "public", "documentation.html")));
 
-app.get('/presensi-kamtibsis', async (req, res) => {
+app.get('/presensi-tugas-pagi', async (req, res) => {
     try {
         const settings = await pool.query('SELECT is_keamanan_form_active FROM settings WHERE id = 1');
         if (settings.rows[0] && settings.rows[0].is_keamanan_form_active) {
@@ -83,7 +83,6 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-// GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 // GANTI SELURUH BLOK INI DI FILE SERVER ANDA
 app.get('/api/search', async (req, res) => {
     const { name } = req.query;
