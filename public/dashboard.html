@@ -208,6 +208,15 @@
                                 class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                         </div>
                     </div>
+                    <div class="flex items-center justify-between bg-white p-3 rounded-lg">
+                            <label for="late-toggle" class="font-medium text-gray-700 text-sm sm:text-base">Presensi
+                                Terlambat</label>
+                            <div class="relative inline-block w-12 align-middle"><input type="checkbox" id="late-toggle"
+                                    class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" /><label
+                                    for="late-toggle"
+                                    class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
                     <div class="text-xs sm:text-sm text-gray-600 space-y-2 pt-3 border-t">
                         <p>Copy link : <button
                                 class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium"
@@ -218,6 +227,12 @@
                                 class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium break-all text-left"
                                 data-link="/presensi-izin-sakit">Presensi izin & sakit</button>
                         </p>
+                        <p class="flex items-start gap-2">
+                                <span class="text-gray-500">Copy link:</span>
+                                <button
+                                    class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium break-all text-left"
+                                    data-link="/presensi-terlambat">Presensi Terlambat</button>
+                            </p>
                     </div>
                 </div>
             </div>
@@ -267,7 +282,7 @@
                             </button>
 
                             <button id="download-btn"
-                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
+                                class="hidden flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
                                 title="Export ke Excel">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -275,6 +290,12 @@
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 <span class="hidden sm:inline">Export</span>
+                            </button>
+                            <button onclick="window.location.href='/riwayat'"
+                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
+                                >
+                                
+                                <span class="hidden sm:inline">Rekap Data</span>
                             </button>
                         </div>
                     </div>
@@ -334,6 +355,7 @@
         const presenceToggle = document.getElementById('presence-toggle');
         const keamananToggle = document.getElementById('keamanan-toggle');
         const izinToggle = document.getElementById('izin-toggle');
+        const lateToggle = document.getElementById('late-toggle');
         const sessionStatusText = document.getElementById('session-status-text');
         const scanButton = document.getElementById('scan-button');
         const scannerInfo = document.getElementById('scanner-info');
@@ -530,7 +552,7 @@
             }
         };
 
-        const loadSettings = async () => {
+       const loadSettings = async () => {
             try {
                 const response = await fetch('/api/settings');
                 const data = await response.json();
@@ -538,12 +560,12 @@
                     presenceToggle.checked = data.is_active;
                     keamananToggle.checked = data.is_keamanan_form_active;
                     izinToggle.checked = data.is_izin_form_active;
+                    lateToggle.checked = data.is_late_form_active; // <-- TAMBAHKAN INI
                     sessionStatusText.textContent = data.is_active ? 'Sesi Dibuka' : 'Sesi Ditutup';
                     sessionStatusText.className = data.is_active ? 'font-bold text-green-600 text-sm sm:text-base' : 'font-medium text-gray-700 text-sm sm:text-base';
                 }
             } catch (error) { Swal.fire({ icon: 'error', title: 'Gagal memuat pengaturan.' }); }
         };
-
         const updateSetting = async (setting) => {
             try {
                 const response = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(setting) });
@@ -616,6 +638,7 @@
         presenceToggle.addEventListener('change', () => updateSetting({ is_active: presenceToggle.checked }));
         keamananToggle.addEventListener('change', () => updateSetting({ is_keamanan_form_active: keamananToggle.checked }));
         izinToggle.addEventListener('change', () => updateSetting({ is_izin_form_active: izinToggle.checked }));
+        lateToggle.addEventListener('change', () => updateSetting({ is_late_form_active: lateToggle.checked }));
         scanButton.addEventListener('click', () => { isScannerRunning ? stopScanner() : startScanner(); });
         dateFilter.addEventListener('change', () => loadAttendanceData(dateFilter.value));
         downloadBtn.addEventListener('click', downloadXLSX);

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat & Rekap Absensi - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #4f46e5;
+            position: relative;
+            animation: l24 1s infinite linear;
+        }
+        .loader:before,
+        .loader:after {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: inherit;
+            animation: inherit;
+            animation-duration: 2s;
+        }
+        .loader:after {
+            animation-duration: 4s;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+        .table-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 3px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background-color: #edf2f7;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <nav class="bg-indigo-600 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-white font-bold text-xl">Admin Absensi</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                    <a href="/generate" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Generate QR</a>
+                    <a href="/riwayat" class="text-gray-300 bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Riwayat</a>
+                    <button id="logoutButton" class="text-gray-300 hover:bg-indigo-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-6 sm:p-8">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Riwayat & Rekap Absensi</h1>
+            <p class="mt-1 text-sm text-gray-600">Filter dan unduh data absensi yang telah tercatat dalam sistem.</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="month-select" class="block text-sm font-medium text-gray-700 mb-1">Pilih Bulan</label>
+                    <select id="month-select" name="month-select" class="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </select>
+                </div>
+                
+                <div>
+                    <label for="devisi-select" class="block text-sm font-medium text-gray-700 mb-1">Pilih Devisi</label>
+                    <select id="devisi-select" name="devisi-select" class="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="Semua">Semua Devisi</option>
+                        <option value="OSIS">OSIS</option>
+                        <option value="KAMTIBSIS">KAMTIB</option>
+                        <option value="MPK">MPK</option>
+                        </select>
+                </div>
+
+                <div class="md:col-span-2 flex items-end space-x-3">
+                    <button id="fetch-button" class="flex-1 justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Tampilkan Data
+                    </button>
+                    <button id="download-button" class="flex-1 justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" disabled>
+                        Unduh (XLSX)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div id="loading-spinner" class="py-20 flex justify-center items-center" style="display: none;">
+                <div class="loader"></div>
+            </div>
+            
+            <div id="table-container" class="table-container overflow-x-auto" style="display: none;">
+                <table id="results-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Lengkap</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Devisi</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">Gunakan filter di atas dan klik "Tampilkan Data" untuk memuat riwayat absensi.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav id="pagination-controls" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" style="display: none;">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <button id="prev-page-mobile" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button id="next-page-mobile" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p id="page-info" class="text-sm text-gray-700">
+                            </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button id="prev-page" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="sr-only">Previous</span>
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <button id="next-page" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="sr-only">Next</span>
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg" style="display: none;">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Variabel state
+            let allRecords = [];
+            let currentPage = 1;
+            const rowsPerPage = 15; 
+
+            // Elemen DOM
+            const monthSelect = document.getElementById('month-select');
+            // === PERUBAHAN DI SINI ===
+            const devisiSelect = document.getElementById('devisi-select'); // Mengganti jabatanSelect
+            const fetchButton = document.getElementById('fetch-button');
+            const downloadButton = document.getElementById('download-button');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const tableContainer = document.getElementById('table-container');
+            const resultsBody = document.getElementById('results-body');
+            const logoutButton = document.getElementById('logoutButton');
+            
+            // Elemen DOM Pagination
+            const paginationControls = document.getElementById('pagination-controls');
+            const pageInfo = document.getElementById('page-info');
+            const prevPage = document.getElementById('prev-page');
+            const nextPage = document.getElementById('next-page');
+            const prevPageMobile = document.getElementById('prev-page-mobile');
+            const nextPageMobile = document.getElementById('next-page-mobile');
+
+
+            // --- Fungsi untuk menampilkan Toast ---
+            function showToast(message, isError = false) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toast-message');
+                
+                toastMessage.textContent = message;
+                toast.className = `fixed bottom-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white ${isError ? 'bg-red-600' : 'bg-gray-900'}`;
+                toast.style.display = 'block';
+
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+
+            // --- Fungsi untuk memformat nama bulan ---
+            function formatMonthName(monthString) {
+                const [year, month] = monthString.split('-');
+                const date = new Date(year, month - 1);
+                return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            }
+
+            // --- 1. Memuat daftar bulan saat halaman dibuka ---
+            async function loadInitialData() {
+                try {
+                    const response = await fetch('/api/history/dates');
+                    if (!response.ok) {
+                        throw new Error('Gagal memuat data bulan.');
+                    }
+                    const months = await response.json();
+                    
+                    if (months.length === 0) {
+                        monthSelect.innerHTML = '<option value="">Belum ada data</option>';
+                        fetchButton.disabled = true;
+                    } else {
+                        monthSelect.innerHTML = months
+                            .map(month => `<option value="${month}">${formatMonthName(month)}</option>`)
+                            .join('');
+                    }
+                } catch (error) {
+                    console.error('Error loadInitialData:', error);
+                    showToast(error.message, true);
+                }
+            }
+
+            // --- 2. Fungsi untuk mengambil data laporan ---
+            async function fetchReportData() {
+                const selectedMonth = monthSelect.value;
+                // === PERUBAHAN DI SINI ===
+                const selectedDevisi = devisiSelect.value; // Mengganti selectedJabatan
+
+                if (!selectedMonth) {
+                    showToast('Silakan pilih bulan terlebih dahulu.', true);
+                    return;
+                }
+
+                // Tampilkan UI loading
+                loadingSpinner.style.display = 'flex';
+                tableContainer.style.display = 'none';
+                paginationControls.style.display = 'none';
+                resultsBody.innerHTML = '';
+                fetchButton.disabled = true;
+                downloadButton.disabled = true;
+
+                try {
+                    // === PERUBAHAN DI SINI (Parameter URL) ===
+                    const response = await fetch(`/api/history/report?month=${selectedMonth}&devisi=${selectedDevisi}`);
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data laporan.');
+                    }
+                    
+                    allRecords = await response.json();
+                    currentPage = 1;
+                    displayPage(currentPage);
+                    
+                } catch (error) {
+                    console.error('Error fetchReportData:', error);
+                    showToast(error.message, true);
+                    // === PERUBAHAN DI SINI (Colspan) ===
+                    resultsBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">Terjadi kesalahan: ${error.message}</td></tr>`;
+                    tableContainer.style.display = 'block';
+                } finally {
+                    loadingSpinner.style.display = 'none';
+                    fetchButton.disabled = false;
+                }
+            }
+
+            // --- 3. Fungsi Menampilkan halaman data tertentu ---
+            function displayPage(page) {
+                currentPage = page;
+                tableContainer.style.display = 'none';
+                paginationControls.style.display = 'none';
+                downloadButton.disabled = true;
+
+                if (allRecords.length === 0) {
+                    // === PERUBAHAN DI SINI (Colspan) ===
+                    resultsBody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">Tidak ada data ditemukan untuk filter yang dipilih.</td></tr>`;
+                    tableContainer.style.display = 'block';
+                    return;
+                }
+
+                const startIndex = (page - 1) * rowsPerPage;
+                const endIndex = page * rowsPerPage;
+                const pageRecords = allRecords.slice(startIndex, endIndex);
+
+                renderTable(pageRecords);
+                updatePaginationControls();
+
+                tableContainer.style.display = 'block';
+                paginationControls.style.display = 'flex';
+                downloadButton.disabled = false;
+            }
+
+
+            // --- 4. Fungsi untuk merender baris tabel ---
+            function renderTable(records) {
+                resultsBody.innerHTML = records.map(record => {
+                    const status = record.status || 'N/A';
+                    const reason = record.reason || '-';
+                    // === PERUBAHAN DI SINI (Ambil data devisi & jabatan) ===
+                    const devisi = record.devisi || '-';
+                    const jabatan = record.jabatan || '-';
+                    
+                    let statusBadge = '';
+                    switch (status.toLowerCase()) {
+                        case 'hadir':
+                            statusBadge = 'bg-green-100 text-green-800';
+                            break;
+                        case 'sakit':
+                            statusBadge = 'bg-yellow-100 text-yellow-800';
+                            break;
+                        case 'izin':
+                            statusBadge = 'bg-blue-100 text-blue-800';
+                            break;
+                        case 'tugas pagi':
+                            statusBadge = 'bg-purple-100 text-purple-800';
+                            break;
+                        default:
+                            statusBadge = 'bg-gray-100 text-gray-800';
+                    }
+
+                    // === PERUBAHAN DI SINI (Tambahkan <td> untuk Devisi dan Jabatan) ===
+                    return `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${record.timestamp}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.full_name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${devisi}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${jabatan}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${statusBadge}">
+                                    ${status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 max-w-xs break-words">${reason}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // --- 5. Fungsi Memperbarui kontrol pagination ---
+            function updatePaginationControls() {
+                const totalRecords = allRecords.length;
+                const totalPages = Math.ceil(totalRecords / rowsPerPage);
+
+                const startIndex = (currentPage - 1) * rowsPerPage + 1;
+                const endIndex = Math.min(currentPage * rowsPerPage, totalRecords);
+
+                pageInfo.innerHTML = `Menampilkan <span class="font-medium">${startIndex}</span> - <span class="font-medium">${endIndex}</span> dari <span class="font-medium">${totalRecords}</span> hasil`;
+
+                prevPage.disabled = (currentPage === 1);
+                prevPageMobile.disabled = (currentPage === 1);
+                
+                nextPage.disabled = (currentPage === totalPages);
+                nextPageMobile.disabled = (currentPage === totalPages);
+            }
+
+            // --- 6. Fungsi untuk mengunduh tabel sebagai Excel ---
+            function downloadExcel() {
+                const selectedMonth = monthSelect.value;
+                // === PERUBAHAN DI SINI ===
+                const selectedDevisi = devisiSelect.value;
+                const fileName = `Rekap_Absensi_${selectedDevisi}_${selectedMonth}.xlsx`;
+
+                if (allRecords.length === 0) {
+                    showToast('Tidak ada data untuk diunduh.', true);
+                    return;
+                }
+
+                // === PERUBAHAN DI SINI (Data ekspor) ===
+                const dataToExport = allRecords.map(record => ({
+                    'Timestamp': record.timestamp,
+                    'Nama Lengkap': record.full_name,
+                    'Devisi': record.devisi || '-',
+                    'Jabatan': record.jabatan || '-',
+                    'Status': record.status || 'N/A',
+                    'Catatan': record.reason || '-'
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Rekap Absensi");
+                XLSX.writeFile(wb, fileName);
+                
+                showToast('Unduhan dimulai: ' + fileName);
+            }
+
+            // --- 7. Fungsi Logout ---
+            async function handleLogout() {
+                try {
+                    const response = await fetch('/api/logout', { method: 'POST' });
+                    const result = await response.json();
+                    if (result.success) {
+                        window.location.href = '/login';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showToast('Gagal logout.', true);
+                }
+            }
+
+            // --- Event Listeners ---
+            fetchButton.addEventListener('click', fetchReportData);
+            downloadButton.addEventListener('click', downloadExcel);
+            logoutButton.addEventListener('click', handleLogout);
+
+            prevPage.addEventListener('click', () => displayPage(currentPage - 1));
+            nextPage.addEventListener('click', () => displayPage(currentPage + 1));
+            prevPageMobile.addEventListener('click', () => displayPage(currentPage - 1));
+            nextPageMobile.addEventListener('click', () => displayPage(currentPage + 1));
+
+            // --- Inisialisasi ---
+            loadInitialData();
+        });
+    </script>
+</body>
+</html>

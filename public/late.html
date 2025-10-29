@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lapor Keterlambatan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="shortcut icon" href="https://ucarecdn.com/ac8a536b-ee74-49e2-92af-5d256d7856ef/Satgas2025.png"
+        type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .custom-dropdown {
+            position: relative;
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            max-height: 240px;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 50;
+            display: none;
+        }
+
+        .dropdown-list.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .dropdown-item.selected {
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .dropdown-empty {
+            padding: 1.5rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .dropdown-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .search-input {
+            padding-left: 2.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-lg border border-gray-100">
+        <div class="text-center mb-6">
+            <img src="https://ucarecdn.com/ac8a536b-ee74-49e2-92af-5d256d7856ef/Satgas2025.png" alt="Logo"
+                class="w-20 h-20 mx-auto mb-3 drop-shadow-md">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lapor Keterlambatan</h1>
+            <p class="text-sm sm:text-base text-gray-500 mt-1">Silakan isi data Anda dengan benar.</p>
+        </div>
+
+        <form id="lateForm" class="space-y-5">
+            <div class="custom-dropdown">
+                <label for="search-name" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Cari Nama Lengkap Anda
+                </label>
+                <div class="search-input-wrapper">
+                    <svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="search-name" placeholder="Ketik untuk mencari nama..."
+                        autocomplete="off" required
+                        class="search-input w-full p-3.5 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                </div>
+                
+                <div id="dropdown-list" class="dropdown-list">
+                    <div class="dropdown-empty">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <p>Ketik untuk mencari nama</p>
+                    </div>
+                </div>
+
+                <input type="hidden" id="nipd" name="nipd">
+                <input type="hidden" id="selected-name" name="selected-name">
+            </div>
+
+            <div>
+                <label for="reason" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Alasan Keterlambatan
+                </label>
+                <textarea id="reason" name="reason" rows="4" placeholder="Contoh: Ban motor bocor di jalan" required
+                    class="w-full p-3.5 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"></textarea>
+            </div>
+
+            <button type="submit" id="submitButton"
+                class="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold py-4 rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-base flex items-center justify-center gap-2">
+                <span id="buttonText">Kirim Laporan</span>
+                <svg id="buttonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let membersData = [];
+        let selectedMember = null;
+
+        async function loadMembers() {
+            try {
+                const response = await fetch('/api/public/members');
+                if (!response.ok) throw new Error('Gagal fetch');
+                
+                membersData = await response.json();
+                console.log('Data loaded:', membersData.length, 'members');
+            } catch (error) {
+                console.error('Gagal memuat data anggota:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal memuat data anggota. Coba muat ulang halaman.',
+                });
+            }
+        }
+
+        function renderDropdown(filteredMembers) {
+            const dropdownList = document.getElementById('dropdown-list');
+            
+            if (filteredMembers.length === 0) {
+                dropdownList.innerHTML = `
+                    <div class="dropdown-empty">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p>Nama tidak ditemukan</p>
+                    </div>
+                `;
+                return;
+            }
+
+            dropdownList.innerHTML = filteredMembers.map(member => `
+                <div class="dropdown-item" data-name="${member.full_name}" data-nipd="${member.nipd}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-indigo-600 font-semibold text-sm">${member.full_name.charAt(0)}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-800 truncate">${member.full_name}</p>
+                            <p class="text-xs text-gray-500">NIPD: ${member.nipd}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const name = item.dataset.name;
+                    const nipd = item.dataset.nipd;
+                    
+                    // Simpan data yang dipilih
+                    selectedMember = { full_name: name, nipd: nipd };
+                    
+                    document.getElementById('search-name').value = name;
+                    document.getElementById('nipd').value = nipd;
+                    document.getElementById('selected-name').value = name;
+                    
+                    dropdownList.classList.remove('active');
+                    
+                    document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    
+                    console.log('Selected:', selectedMember);
+                });
+            });
+        }
+
+        document.getElementById('search-name').addEventListener('focus', () => {
+            const dropdownList = document.getElementById('dropdown-list');
+            dropdownList.classList.add('active');
+            if (membersData.length > 0) {
+                renderDropdown(membersData);
+            }
+        });
+
+        document.getElementById('search-name').addEventListener('input', (e) => {
+            const inputValue = e.target.value.toLowerCase().trim();
+            const dropdownList = document.getElementById('dropdown-list');
+            
+            // Reset jika user mengetik manual (bukan dari klik dropdown)
+            if (selectedMember && inputValue !== selectedMember.full_name.toLowerCase()) {
+                selectedMember = null;
+                document.getElementById('nipd').value = '';
+                document.getElementById('selected-name').value = '';
+            }
+
+            if (inputValue.length === 0) {
+                renderDropdown(membersData);
+            } else {
+                const filtered = membersData.filter(member => 
+                    member.full_name.toLowerCase().includes(inputValue) ||
+                    member.nipd.toLowerCase().includes(inputValue)
+                );
+                renderDropdown(filtered);
+            }
+            
+            dropdownList.classList.add('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.querySelector('.custom-dropdown');
+            const dropdownList = document.getElementById('dropdown-list');
+            
+            if (!dropdown.contains(e.target)) {
+                dropdownList.classList.remove('active');
+            }
+        });
+
+        document.getElementById('lateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonIcon = document.getElementById('buttonIcon');
+            const nipd = document.getElementById('nipd').value.trim();
+            const reason = document.getElementById('reason').value.trim();
+            const selectedName = document.getElementById('selected-name').value.trim();
+
+            // Validasi: pastikan user memilih dari dropdown, bukan ketik manual
+            if (!nipd || !selectedName || !selectedMember) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nama Tidak Valid',
+                    text: 'Silakan pilih nama Anda dari daftar dropdown yang tersedia.',
+                });
+                return;
+            }
+
+            // Validasi: pastikan NIPD cocok dengan yang dipilih
+            if (nipd !== selectedMember.nipd || selectedName !== selectedMember.full_name) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Tidak Valid',
+                    text: 'Silakan pilih ulang nama Anda dari daftar dropdown.',
+                });
+                return;
+            }
+
+            if (!reason) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Alasan Wajib Diisi',
+                    text: 'Silakan masukkan alasan keterlambatan Anda.',
+                });
+                return;
+            }
+
+            submitButton.disabled = true;
+            buttonText.textContent = 'Mengirim...';
+            buttonIcon.innerHTML = '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>';
+            buttonIcon.classList.add('animate-spin');
+
+            try {
+                const response = await fetch('/api/absen-terlambat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nipd, reason })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: result.message,
+                        confirmButtonColor: '#4f46e5',
+                    }).then(() => {
+                        document.getElementById('lateForm').reset();
+                        document.getElementById('nipd').value = '';
+                        document.getElementById('selected-name').value = '';
+                        selectedMember = null;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: result.message || 'Terjadi kesalahan.',
+                    });
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Tidak dapat terhubung ke server.',
+                });
+            } finally {
+                submitButton.disabled = false;
+                buttonText.textContent = 'Kirim Laporan';
+                buttonIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>';
+                buttonIcon.classList.remove('animate-spin');
+            }
+        });
+
+        window.addEventListener('load', loadMembers);
+    </script>
+</body>
+</html>
