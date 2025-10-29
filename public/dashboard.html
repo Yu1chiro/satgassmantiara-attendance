@@ -209,14 +209,14 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between bg-white p-3 rounded-lg">
-                            <label for="late-toggle" class="font-medium text-gray-700 text-sm sm:text-base">Presensi
-                                Terlambat</label>
-                            <div class="relative inline-block w-12 align-middle"><input type="checkbox" id="late-toggle"
-                                    class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" /><label
-                                    for="late-toggle"
-                                    class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                            </div>
+                        <label for="late-toggle" class="font-medium text-gray-700 text-sm sm:text-base">Presensi
+                            Terlambat</label>
+                        <div class="relative inline-block w-12 align-middle"><input type="checkbox" id="late-toggle"
+                                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" /><label
+                                for="late-toggle"
+                                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                         </div>
+                    </div>
                     <div class="text-xs sm:text-sm text-gray-600 space-y-2 pt-3 border-t">
                         <p>Copy link : <button
                                 class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium"
@@ -228,11 +228,11 @@
                                 data-link="/presensi-izin-sakit">Presensi izin & sakit</button>
                         </p>
                         <p class="flex items-start gap-2">
-                                <span class="text-gray-500">Copy link:</span>
-                                <button
-                                    class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium break-all text-left"
-                                    data-link="/presensi-terlambat">Presensi Terlambat</button>
-                            </p>
+                            <span class="text-gray-500">Copy link:</span>
+                            <button
+                                class="copy-btn font-mono text-indigo-600 hover:text-indigo-700 font-medium break-all text-left"
+                                data-link="/presensi-terlambat">Presensi Terlambat</button>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -252,7 +252,7 @@
                     <div>
                         <a href="/documentation"
                             class="bg-blue-600 text-white cursor-pointer font-normal py-2.5 px-4 rounded-lg hover:bg-blue-700 transition text-sm">
-                            Tutorial</a>
+                            Panduan</a>
                         <a href="/generate"
                             class="bg-green-600 text-white font-normal py-2.5 px-4 rounded-lg hover:bg-green-700 transition text-sm">Generate
                             QR</a>
@@ -282,20 +282,15 @@
                             </button>
 
                             <button id="download-btn"
-                                class="hidden flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
+                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
                                 title="Export ke Excel">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                                <span class="hidden sm:inline">Export</span>
+                              
+                                <span class="sm:inline">Export</span>
                             </button>
                             <button onclick="window.location.href='/riwayat'"
-                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
-                                >
-                                
-                                <span class="hidden sm:inline">Rekap Data</span>
+                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm">
+
+                                <span class="sm:inline">Rekap Data</span>
                             </button>
                         </div>
                     </div>
@@ -347,7 +342,89 @@
             </div>
         </main>
     </div>
+    <!-- Information update -->
+    <!-- Modal HTML -->
+    <div id="welcomeModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm">
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md lg:max-w-lg max-h-[85vh] overflow-hidden transform transition-all">
 
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-5 sm:p-6 text-white relative">
+                <button onclick="closeModal()"
+                    class="absolute top-4 right-4 text-white hover:text-gray-200 text-3xl font-light transition duration-200">
+                    &times;
+                </button>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="bg-white bg-opacity-20 rounded-full p-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold leading-tight">Information Update</h2>
+                </div>
+            </div>
+
+            <!-- Content (scrollable) -->
+            <div
+                class="p-5 sm:p-6 space-y-5 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
+                    <p class="text-sm font-semibold text-blue-800 mb-2">Version update 1.0</p>
+                    <p class="text-gray-700 text-sm leading-relaxed">
+                        Halo Admin 👋<br><br>
+                        Sistem telah mengalami pembaruan dengan penambahan fitur baru, yaitu
+                        <span class="font-semibold">Rekap Data</span> dan
+                        <span class="font-semibold">Absen Keterlambatan</span>.<br><br>
+                        Kini, proses rekapitulasi data dapat dilakukan langsung di halaman <span
+                            class="font-semibold">Rekap Data</span>
+                        dengan fitur <em>filter</em> berdasarkan bulan dan jabatan sesuai data yang ingin
+                        direkap. Selain itu, data rekapan dapat di download dalam bentuk excel/xlsx<br><br>
+                        Kemudian, terdapat penambahan fitur terbaru yakni form keterlambatan. Form tersebut harus diaktifkan
+                        terlebih dahulu melalui
+                        <em>toggle</em> sebelum diberikan kepada bagian atau <em>sie</em> yang bersangkutan.<br><br>
+                        Silakan lakukan absensi dengan tertib, jujur, dan sesuai prosedur. ✅
+                    </p>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <button onclick="closeModal()"
+                        class="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 
+                 text-white font-semibold py-2.5 px-8 rounded-lg shadow-lg transition duration-200 transform hover:scale-105">
+                        Baik, Mengerti
+                    </button>
+                    <div class="text-center sm:text-right">
+                        <p class="text-xs font-normal text-gray-700 mb-2">Salam</p>
+                        <p class="text-sm font-semibold text-gray-700">Developer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modalId = 'welcomeModal';
+        const storageKey = 'information-v1';
+
+        function closeModal() {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            // Simpan ke localStorage agar modal tidak muncul lagi
+            localStorage.setItem(storageKey, 'true');
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            // Cek apakah modal sudah pernah ditampilkan
+            const hasShown = localStorage.getItem(storageKey);
+
+            if (!hasShown) {
+                const modal = document.getElementById(modalId);
+                modal.classList.remove('hidden');
+            }
+        });
+    </script>
     <script>
         // --- Elemen DOM ---
         const dateFilter = document.getElementById('dateFilter');
@@ -552,7 +629,7 @@
             }
         };
 
-       const loadSettings = async () => {
+        const loadSettings = async () => {
             try {
                 const response = await fetch('/api/settings');
                 const data = await response.json();

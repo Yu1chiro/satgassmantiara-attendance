@@ -11,8 +11,8 @@
         <!-- Header -->
         <header class="bg-blue-600 text-white shadow-lg">
             <div class="container mx-auto px-4 py-6">
-                <h1 class="text-3xl font-bold">📱 Tutorial Sistem Absensi Satgas/OSIS</h1>
-                <p class="text-blue-100 mt-2">Panduan penggunaan website absensi</p>
+                <h1 class="text-3xl font-bold">Panduan Penggunaan Sistem Absensi</h1>
+                <p class="text-blue-100 mt-2">Silahkan baca dengan cermat</p>
             </div>
         </header>
 
@@ -22,8 +22,8 @@
                 <div class="flex items-start">
                     <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">1</span>
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Admin Menceklist Toggle Aktif Pemindai</h3>
-                        <p class="text-gray-700">Admin mengaktifkan toggle "Aktif Pemindai" untuk memulai sistem scanning barcode.</p>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Menceklist Toggle Scan</h3>
+                        <p class="text-gray-700">Sebelum menscan barcode, admin wajib mengaktifkan toggle "Aktif Pemindai" untuk memulai sistem scanning barcode.</p>
                     </div>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                 <div class="flex items-start">
                     <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">2</span>
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Admin Mulai Scan Barcode Siswa</h3>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Scan Barcode Siswa</h3>
                         <p class="text-gray-700">Admin mulai memindai barcode yang dibawa oleh setiap siswa menggunakan kamera.</p>
                     </div>
                 </div>
@@ -60,25 +60,45 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Langkah 5 -->
+            <!-- 5 -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-start">
                     <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">5</span>
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Form Tugas Pagi untuk Sie yang Bertugas</h3>
-                        <p class="text-gray-700">Jika ada yang tugas pagi, admin bisa menceklist toggle form tugas pagi, silahkan berikan ke sie yang bertugas.</p>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Form Terlambat</h3>
+                        <p class="text-gray-700 mb-3">Jika ada siswa yang belum melakukan absensi. Admin dapat men-cheklist toggle form keterlambatan dan memberikan link aksesnya kepada sie yang terlambat</p>
                     </div>
                 </div>
             </div>
+
 
             <!-- Langkah 6 -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-start">
                     <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">6</span>
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Reset Data untuk Hari Berikutnya</h3>
-                        <p class="text-gray-700">Jika sudah melakukan absensi pada hari ini dan ingin melakukan absensi di hari berikutnya, admin bisa mengklik button reset merah di area tabel.</p>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Fitur Reset Data</h3>
+                        <p class="text-gray-700"> <strong>Hati-hati menggunakan fitur ini</strong>jika ingin me reset data absen hari ini pastikan data saat ini sudh di download/export, <strong>baca fungsi fitur export di point ke-7</strong>. Fitur ini berfungsi jika 1 hari terdapat 2 kegiatan contoh : event pagi dan event sore-malam.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 7 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-start">
+                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">7</span>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Fitur Export Data</h3>
+                        <p class="text-gray-700">Fitur ini berfungsi untuk mendownload data berdasarkaan hari. Fitur ini tidak dapat menfilter data yang di download berdasarkan jabatan. <strong>Fitur ini dapat digunakan sesuai syarat point ke-6</strong>.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 8 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-start">
+                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">8</span>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Fitur Rekap Data</h3>
+                        <p class="text-gray-700">Fitur rekap data berfungsi untuk melakakukan rekaptulasi data berdasarkan bulan dan jabatan gunakan fitur ini untuk melakukan rekap data absensi bulanan. Fitur ini biasanya digunakan oleh sekretaris devisi</p>
                     </div>
                 </div>
             </div>
@@ -86,10 +106,12 @@
             <!-- Langkah 7 -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex items-start">
-                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">7</span>
+                    <span class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4 flex-shrink-0">9</span>
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Presensi Siap untuk Kegiatan Selanjutnya</h3>
-                        <p class="text-gray-700">Presensi untuk kegiatan selanjutnya bisa digunakan.</p>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Kontak & Pertanyaan</h3>
+                        <p class="text-gray-700">Jika ada keluhan mengenai <strong>bug/error</strong> pada sistem atau ingin melakukan pembaruan data Satgas silahkan kontak developer di : <br><br>
+                        <a class="rounded-lg bg-green-600 hover:bg-green-800 text-white font-semibold px-2 py-2" href="https://wa.me/6281236715460?text=Hallo+kak+ini+sistemnya+ada+yang+error">Chat to  Whatsapp</a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -98,7 +120,7 @@
         <!-- Footer -->
         <footer class="bg-gray-800 text-white py-6 mt-12">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-400">Tutorial Sistem Absensi Satgas/OSIS</p>
+                <p class="text-gray-400">Dokumentasi penggunaan - 2025</p>
             </div>
         </footer>
     </div>
