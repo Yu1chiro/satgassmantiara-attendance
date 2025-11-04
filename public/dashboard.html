@@ -17,6 +17,18 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* ▼▼▼ TAMBAHKAN CSS UNTUK ANIMASI MODAL BARU ▼▼▼ */
+        #scanConfirmModal.hidden #scanConfirmModalContent {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        #scanConfirmModal #scanConfirmModalContent {
+            transform: scale(1);
+            opacity: 1;
+            transition: all 0.2s ease-out;
+        }
+
         .toggle-checkbox {
             left: 0;
             transition: all 0.2s ease-in-out;
@@ -284,7 +296,7 @@
                             <button id="download-btn"
                                 class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg text-sm"
                                 title="Export ke Excel">
-                              
+
                                 <span class="sm:inline">Export</span>
                             </button>
                             <button onclick="window.location.href='/riwayat'"
@@ -341,6 +353,44 @@
                 </div>
             </div>
         </main>
+        <div id="scanConfirmModal"
+            class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm transform transition-all"
+                id="scanConfirmModalContent" style="transform: scale(0.95); opacity: 0;">
+
+                <div class="bg-gradient-to-r from-indigo-500 to-blue-600 p-5 sm:p-6 text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white bg-opacity-20 rounded-full p-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold leading-tight">Konfirmasi Kehadiran</h2>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-6 space-y-4">
+                    <p class="text-base text-gray-700 text-center">Apakah satgas ini name tagnya sudah sesuai?</p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                        <p id="modalMemberName" class="text-xl font-bold text-gray-900">Nama Anggota</p>
+                        <p id="modalMemberJabatan" class="text-sm text-gray-600">Jabatan / Devisi</p>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-5 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                    <button id="modalCancelBtn"
+                        class="bg-gray-200 text-gray-800 font-semibold py-2.5 px-6 rounded-lg hover:bg-gray-300 transition shadow-sm">
+                        Batal
+                    </button>
+                    <button id="modalConfirmBtn"
+                        class="bg-green-600 text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg">
+                        Ya, Konfirmasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     <!-- Information update -->
     <!-- Modal HTML -->
@@ -380,7 +430,8 @@
                             class="font-semibold">Rekap Data</span>
                         dengan fitur <em>filter</em> berdasarkan bulan dan jabatan sesuai data yang ingin
                         direkap. Selain itu, data rekapan dapat di download dalam bentuk excel/xlsx<br><br>
-                        Kemudian, terdapat penambahan fitur terbaru yakni form keterlambatan. Form tersebut harus diaktifkan
+                        Kemudian, terdapat penambahan fitur terbaru yakni form keterlambatan. Form tersebut harus
+                        diaktifkan
                         terlebih dahulu melalui
                         <em>toggle</em> sebelum diberikan kepada bagian atau <em>sie</em> yang bersangkutan.<br><br>
                         Silakan lakukan absensi dengan tertib, jujur, dan sesuai prosedur. ✅
@@ -442,7 +493,8 @@
         const prevPageBtn = document.getElementById('prev-page-btn');
         const nextPageBtn = document.getElementById('next-page-btn');
         const pageInfo = document.getElementById('page-info');
-
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
         // --- State Management ---
         let currentRecords = [];
         let filteredRecords = [];
@@ -451,7 +503,42 @@
 
         let html5QrCode = null;
         let isScannerRunning = false;
+        // ▼▼▼ TAMBAHKAN HELPER UNTUK MODAL & SCANNER ▼▼▼
+        let scannedNIPD = null; // Menyimpan NIPD sementara
 
+        const showScanModal = (member) => {
+            scannedNIPD = member.nipd; // Simpan NIPD
+            modalMemberName.textContent = member.full_name;
+            modalMemberJabatan.textContent = `${member.jabatan || ''} / ${member.devisi || ''}`;
+            
+            scanConfirmModal.classList.remove('hidden');
+            // Memicu reflow untuk animasi
+            void scanConfirmModalContent.offsetWidth; 
+            scanConfirmModalContent.style.transform = 'scale(1)';
+            scanConfirmModalContent.style.opacity = '1';
+        };
+
+        const hideScanModal = () => {
+            scannedNIPD = null; // Hapus NIPD
+            scanConfirmModalContent.style.transform = 'scale(0.95)';
+            scanConfirmModalContent.style.opacity = '0';
+            setTimeout(() => {
+                scanConfirmModal.classList.add('hidden');
+            }, 200); // Sesuaikan dengan durasi transisi CSS
+        };
+
+        const resumeScanner = (delay = 1500) => {
+             // Lanjutkan scan setelah jeda singkat
+            setTimeout(() => {
+                if (isScannerRunning) {
+                    try {
+                        html5QrCode.resume();
+                    } catch (e) {
+                        console.warn("Gagal melanjutkan scanner:", e);
+                    }
+                }
+            }, delay);
+        };
         // --- Fungsi Render Tabel & Paginasi ---
         const renderTable = () => {
             const searchTerm = searchInput.value.toLowerCase();
@@ -560,40 +647,40 @@
             }, 3000);
         };
 
+        // ▼▼▼ TAMBAHKAN FUNGSI BARU INI UNTUK MEMPROSES KONFIRMASI ▼▼▼
+        const confirmAttendance = async () => {
+            if (!scannedNIPD) return; // Safety check
 
-        const onScanSuccess = async (decodedText) => {
-            // Hentikan scan sejenak untuk mencegah pemindaian ganda
-            if (isScannerRunning) html5QrCode.pause();
+            const nipdToConfirm = scannedNIPD; // Ambil NIPD yang disimpan
+            hideScanModal(); // Sembunyikan modal
 
-            // Optimasi: Langsung kirim request tanpa loading popup
             try {
+                // Optimasi: Langsung kirim request
                 const response = await fetch('/api/scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nipd: decodedText })
+                    body: JSON.stringify({ nipd: nipdToConfirm })
                 });
 
                 const result = await response.json();
 
-                // Tampilkan notifikasi toast cepat
+                // Tampilkan notifikasi toast
                 showToast(result.message, response.ok);
 
                 if (response.ok) {
-                    // Getarkan perangkat jika sukses
                     if (window.navigator.vibrate) window.navigator.vibrate(100);
 
-                    // Update UI secara langsung (Optimistic UI)
+                    // Update UI (Optimistic UI)
                     const recordIndex = currentRecords.findIndex(record => String(record.nipd) === String(result.nipd));
                     if (recordIndex !== -1) {
                         currentRecords[recordIndex].status = 'Hadir';
                         currentRecords[recordIndex].time = result.time;
                         renderTable();
                     } else {
-                        // Fallback jika data tidak ditemukan di lokal
-                        await loadAttendanceData(dateFilter.value);
+                        await loadAttendanceData(dateFilter.value); // Fallback
                     }
                 } else if (response.status === 409) {
-                    // Jika sudah ada (konflik), tetap sinkronkan data untuk memastikan
+                    // Jika sudah ada (konflik), sinkronkan data
                     await loadAttendanceData(dateFilter.value);
                 }
 
@@ -601,10 +688,41 @@
                 console.error("Scan/Fetch Error:", err);
                 showToast("Koneksi ke server gagal.", false);
             } finally {
-                // Lanjutkan scan setelah jeda singkat (misal 1 detik)
-                setTimeout(() => {
-                    if (isScannerRunning) html5QrCode.resume();
-                }, 1500);
+                resumeScanner(); // Resume scanner setelah selesai
+            }
+        };
+        // ▲▲▲ SELESAI FUNGSI confirmAttendance ▲▲▲
+       // GANTI FUNGSI onScanSuccess LAMA ANDA DENGAN INI
+        const onScanSuccess = async (decodedText) => {
+            // Hentikan scan sejenak untuk mencegah pemindaian ganda
+            if (isScannerRunning) {
+                 try {
+                    html5QrCode.pause();
+                } catch (e) {
+                    console.warn("Gagal menghentikan scanner:", e);
+                }
+            }
+
+            // 1. Cari anggota di data lokal (currentRecords)
+            const member = currentRecords.find(record => String(record.nipd) === String(decodedText));
+
+            if (member) {
+                // 2. Jika anggota ditemukan, cek statusnya
+                
+                // Cek apakah sudah hadir atau berhalangan
+                if (member.status !== 'Belum Hadir') {
+                    showToast(`${member.full_name} sudah tercatat ${member.status} hari ini.`, false);
+                    resumeScanner(); // Langsung resume jika sudah absen
+                    return; // Hentikan proses
+                }
+                
+                // Tampilkan modal konfirmasi jika "Belum Hadir"
+                showScanModal(member);
+            } else {
+                // 3. Jika tidak ditemukan, NIPD tidak valid
+                console.error("Scan Error: NIPD not found in local records", decodedText);
+                showToast("QR Code tidak valid atau tidak terdaftar.", false);
+                resumeScanner(); // Langsung resume jika QR tidak valid
             }
         };
         const startScanner = () => {
@@ -711,7 +829,13 @@
                 Swal.fire({ title: 'Alasan Keterangan', text: e.target.closest('.view-reason-btn').dataset.reason || 'Tidak ada alasan yang diberikan.', icon: 'info' });
             }
         });
-
+        // ▼▼▼ TAMBAHKAN EVENT LISTENER UNTUK TOMBOL MODAL BARU ▼▼▼
+        modalConfirmBtn.addEventListener('click', confirmAttendance);
+        
+        modalCancelBtn.addEventListener('click', () => {
+            hideScanModal();
+            resumeScanner(500); // Resume lebih cepat jika dibatalkan
+        });
         presenceToggle.addEventListener('change', () => updateSetting({ is_active: presenceToggle.checked }));
         keamananToggle.addEventListener('change', () => updateSetting({ is_keamanan_form_active: keamananToggle.checked }));
         izinToggle.addEventListener('change', () => updateSetting({ is_izin_form_active: izinToggle.checked }));
